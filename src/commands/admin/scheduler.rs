@@ -12,9 +12,9 @@ use twilight_model::id::marker::RoleMarker;
 use twilight_model::id::Id;
 use twilight_util::builder::embed;
 
-use crate::commands::{CommandContext, CommandResult};
+use crate::commands::{CommandContext, CommandError, CommandResult};
 use crate::utils::prelude::*;
-use crate::Context;
+use crate::{parser, Context};
 
 /// Command: Manage community event schedule.
 pub async fn scheduler(cc: CommandContext<'_>) -> CommandResult {
@@ -44,7 +44,7 @@ struct Event {
 /// Command: Add a community event to be scheduled.
 /// Usage: scheduler add <name of event> <year> <month> <day> <hours> <minutes> <seconds>, time in UTC
 pub async fn add(cc: CommandContext<'_>) -> CommandResult {
-    let args: Vec<&str> = cc.args.split(' ').collect();
+    let args = parser::parse_args(cc.args.trim())?;
 
     // Create a date from arguments
     let mut date_vec: Vec<u32> = Vec::new();
@@ -64,6 +64,12 @@ pub async fn add(cc: CommandContext<'_>) -> CommandResult {
         }
     }
 
+    let event_name = args
+        .get(0)
+        .ok_or(CommandError::MissingArgs)?
+        .trim()
+        .to_string();
+
     let time = Utc::now();
     let completion = Utc
         .ymd(date_vec[0] as i32, date_vec[1], date_vec[2])
@@ -78,7 +84,7 @@ pub async fn add(cc: CommandContext<'_>) -> CommandResult {
 
     let event = Event {
         id: rand_file_name,
-        name: args[0].to_string(),
+        name: event_name.clone(),
         added_by: query_user,
         added_at: time,
         finishing_at: completion,
@@ -104,10 +110,7 @@ pub async fn add(cc: CommandContext<'_>) -> CommandResult {
     // Create and send an embed
     let embed = embed::EmbedBuilder::new()
         .title("Event added")
-        .field(embed::EmbedFieldBuilder::new(
-            "Event name: ",
-            args[0].to_string(),
-        ))
+        .field(embed::EmbedFieldBuilder::new("Event name: ", event_name))
         .field(embed::EmbedFieldBuilder::new(
             "Starts at: ",
             format!("{completion}\n{completed_in}"),
@@ -202,9 +205,10 @@ async fn check_schedule(ctx: &Context, look_ahead: u64) -> AnyResult<()> {
         let finish_time = event.finishing_at.timestamp();
 
         // If such tasks are found, push them to a vector
-        if (finish_time.saturating_sub(now) as u64) < look_ahead {
+
+        if finish_time - now < look_ahead as i64 {
             tasks.push(event);
-        };
+        }
     }
 
     let mut futs = tokio::task::JoinSet::new();
@@ -216,7 +220,11 @@ async fn check_schedule(ctx: &Context, look_ahead: u64) -> AnyResult<()> {
 
         fs::remove_file(format!("./data/events/{}.json", &task.id))?;
 
-        futs.spawn(wait_for_starting(ctx.clone(), task, time_left as u64));
+        futs.spawn(wait_for_starting(
+            ctx.clone(),
+            task,
+            u64::try_from(time_left).unwrap_or(0),
+        ));
     }
 
     // This will wait for all tasks to complete in this period.
