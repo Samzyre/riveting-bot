@@ -37,14 +37,13 @@ macro_rules! function_trait {
             F: Fn(Context, $request) -> Fut + Send + Sync + 'static,
             Fut: ResponseFuture + 'static,
         {
-            fn call(&self, ctx: Context, req: $request) -> CallFuture {
-                use futures::TryFutureExt;
-                Box::pin((self)(ctx, req).and_then(|x| x))
+            fn call(&self, ctx: Context, req: $request) -> AsyncResponse {
+                Box::pin((self)(ctx, req))
             }
         }
 
         impl Callable<$request> for Arc<dyn Callable<$request>> {
-            fn call(&self, ctx: Context, req: $request) -> CallFuture {
+            fn call(&self, ctx: Context, req: $request) -> AsyncResponse {
                 (**self).call(ctx, req)
             }
 
@@ -79,7 +78,7 @@ pub type MessageFunction = Arc<dyn Callable<MessageRequest>>;
 pub type UserFunction = Arc<dyn Callable<UserRequest>>;
 
 /// Trait for functions that can be called with a generic request.
-pub trait Callable<R, O = CallFuture>: Send + Sync {
+pub trait Callable<R, O = AsyncResponse>: Send + Sync {
     fn call(&self, ctx: Context, req: R) -> O;
     fn into_shared(self) -> Arc<dyn Callable<R, O>>
     where

@@ -39,6 +39,7 @@ pub async fn application_command(
         )));
     };
 
+    let name = base.command.name;
     let base = Arc::clone(base);
     let inter = Arc::new(inter);
     let data = Arc::new(data);
@@ -57,7 +58,7 @@ pub async fn application_command(
 
     // Handle execution result.
     // Catch erroneous execution and clear dangling response.
-    if let Err(e) = result {
+    if result.is_err() {
         ctx.interaction()
             .create_followup(&inter.token)
             .flags(MessageFlags::EPHEMERAL)
@@ -65,7 +66,9 @@ pub async fn application_command(
             .await
             .context("Failed to send error message")?;
 
-        return Err(e);
+        return result
+            .with_context(|| format!("Error in application command '{name}'"))
+            .map_err(Into::into);
     }
 
     Ok(())
@@ -321,18 +324,21 @@ pub async fn classic_command(ctx: &Context, msg: Arc<Message>) -> CommandResult<
 
     debug!("Executing '{name}' by user '{}'", msg.author.id);
 
-    let response = execute(ctx, funcs, req).await;
+    let result = execute(ctx, funcs, req).await;
 
     trace!("Completing '{name}' by user '{}'", msg.author.id);
 
     // Handle execution result.
-    if let Err(e) = response {
+    if result.is_err() {
         ctx.http
             .create_message(msg.channel_id)
             .content(ERROR_MESSAGE)?
-            .await?;
+            .await
+            .context("Failed to send error message")?;
 
-        return Err(e);
+        return result
+            .with_context(|| format!("Error in classic command '{name}'"))
+            .map_err(Into::into);
     }
 
     Ok(())
@@ -397,6 +403,7 @@ fn parse_classic_args(
     let mut split = args.iter().position(|a| !a.required).unwrap_or(args.len());
     let mut parser = MessageParser::new(msg, rest);
 
+    // TODO: Generate help for this.
     // Process all the required args.
     for arg in &args[..split] {
         let arg = parser.parse_next(arg).context("Required argument error")?;
@@ -550,26 +557,24 @@ where
     F: Callable<R>,
     R: Clone + Send,
 {
-    let mut set = JoinSet::new();
+    let mut set = JoinSet::<CommandResponse>::new();
     let mut results = Vec::new();
 
     for func in funcs {
-        set.spawn(func.call(ctx.to_owned(), req.clone()));
+        set.spawn(func.call(ctx.to_owned(), req.to_owned()));
     }
 
     // Wait for completion.
     while let Some(task) = set.join_next().await {
-        results.push(task.context("Execution task join error"));
+        results.push(task);
     }
-
-    // This should not fail.
-    let last = results.pop().expect("No results from command handlers");
 
     for r in results {
-        // TODO: Collect all errors and responses.
-        // Prioritize returning errors immediately, for now.
-        r?.ok();
+        r.context("Execution task join error")?
+            .context("Execution error")?
+            .await
+            .context("Response error")?;
     }
 
-    last?.context("Execution result").map_err(Into::into)
+    Ok(())
 }

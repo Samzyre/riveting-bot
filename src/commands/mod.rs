@@ -64,7 +64,7 @@ pub mod prelude {
         ClassicRequest, MessageRequest, Request, SlashRequest, UserRequest,
     };
     pub use crate::commands::{
-        CallFuture, CommandError, CommandFuture, CommandResponse, CommandResult, Response,
+        AsyncResponse, CommandError, CommandFuture, CommandResponse, CommandResult, Response,
         ResponseFuture,
     };
     pub use crate::Context;
@@ -153,6 +153,8 @@ impl_into_command_error!(Other; twilight_util::builder::embed::image_source::Ima
 impl_into_command_error!(Other; twilight_validate::message::MessageValidationError);
 impl_into_command_error!(Other; twilight_validate::request::ValidationError);
 
+// Function -> CommandResponse -> Response -> CommandResult
+
 /// Trait alias for a command response future.
 pub trait ResponseFuture = Future<Output = CommandResponse> + Send;
 
@@ -160,9 +162,9 @@ pub trait ResponseFuture = Future<Output = CommandResponse> + Send;
 pub trait CommandFuture = Future<Output = CommandResult<()>> + Send;
 
 /// Non-generic return type for async command functions.
-pub type CallFuture = Pin<Box<dyn CommandFuture>>;
+pub type AsyncResponse = Pin<Box<dyn ResponseFuture>>;
 
-/// Response result from a command function.
+/// Result with a response from a command function.
 pub type CommandResponse = Result<Response, CommandError>;
 
 /// Generic command result with command error type.
@@ -170,7 +172,7 @@ pub type CommandResult<T> = Result<T, CommandError>;
 
 /// Command function response type.
 #[derive(Deref, DerefMut)]
-pub struct Response(CallFuture);
+pub struct Response(Pin<Box<dyn CommandFuture>>);
 
 impl Response {
     /// Noop.
