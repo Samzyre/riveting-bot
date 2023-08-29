@@ -96,8 +96,8 @@ pub struct Storage {
 }
 
 impl Storage {
-    const GLOBAL: &str = "./data/global/";
-    const GUILDS: &str = "./data/guilds/";
+    const GLOBAL: &'static str = "./data/global/";
+    const GUILDS: &'static str = "./data/guilds/";
 
     /// Get global storage.
     ///
