@@ -1,6 +1,8 @@
 /*!
 Command template:
 ```
+use crate::commands::prelude::*;
+
 pub struct Command;
 
 impl Command {
