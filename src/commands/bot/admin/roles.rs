@@ -516,7 +516,7 @@ async fn dropdown_components(
                 default: false,
                 description: Some("Cancel".to_string()),
                 emoji: None,
-                label: " ".to_string(), // Empty, but not.
+                label: "-".to_string(), // Empty, but not.
                 value: "cancel".to_string(),
             }
         ])
