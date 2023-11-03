@@ -46,8 +46,6 @@ use crate::config::BotConfig;
 use crate::utils::prelude::*;
 
 mod commands;
-
-// mod commands;
 mod config;
 mod parser;
 mod utils;
