@@ -89,9 +89,38 @@ pub fn create_commands() -> AnyResult<Commands> {
     #[cfg(feature = "owner")]
     commands.bind(owner::Shutdown::command());
 
+    add_commands_to_help(&mut commands);
+
     commands
         .validate()
         .context("Failed to validate commands list")?;
 
     Ok(commands.build())
+}
+
+// HACK: This really is an afterthought.
+fn add_commands_to_help(cmds: &mut CommandsBuilder) {
+    use super::builder::{ArgDesc, ArgKind, CommandOption, StringData};
+
+    let names = cmds
+        .list
+        .iter()
+        .map(|c| (c.command.name.to_string(), c.command.name.to_string()))
+        .collect::<Vec<_>>();
+    let choices = cmds
+        .list
+        .iter_mut()
+        .find(|c| c.command.name == "help")
+        .and_then(|c| {
+            c.command.options.iter_mut().find_map(|a| match a {
+                CommandOption::Arg(ArgDesc {
+                    name: "command",
+                    kind: ArgKind::String(StringData { choices, .. }),
+                    ..
+                }) => Some(choices),
+                _ => None,
+            })
+        })
+        .expect("No help command found");
+    *choices = names;
 }

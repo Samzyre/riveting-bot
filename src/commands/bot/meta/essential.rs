@@ -118,7 +118,7 @@ impl Help {
         command("help", "List bot commands.")
             .attach(Self::classic)
             .attach(Self::slash)
-            .option(string("command", "Get help on a command."))
+            .option(string("command", "Get help on a command.")) // Choices added here after other binds.
             .dm()
     }
 
