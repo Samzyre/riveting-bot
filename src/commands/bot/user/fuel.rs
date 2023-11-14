@@ -106,7 +106,7 @@ impl Fuel {
             )
             .field(EmbedFieldBuilder::new(
                 "Laptime window for minimum fuel",
-                format!("{} - {}", min_laptime.to_string(), max_laptime.to_string()),
+                format!("{} - {}", min_laptime, max_laptime),
             ))
             .footer(EmbedFooterBuilder::new(format!(
                 "Stint: {stint}, Laptime: {laptime}, Usage: {consumption}",
