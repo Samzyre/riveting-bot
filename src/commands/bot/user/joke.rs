@@ -1,5 +1,3 @@
-use reqwest;
-
 use crate::commands::prelude::*;
 
 /// Command: Send a dad joke.

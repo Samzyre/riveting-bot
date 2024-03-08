@@ -15,13 +15,11 @@ use twilight_model::http::interaction::{
 use twilight_util::permission_calculator::PermissionCalculator;
 
 use crate::commands::arg::{Arg, ArgValue, Ref};
-use crate::commands::builder::{
-    ArgDesc, ArgKind, BaseCommand, CommandFunction, CommandGroup, CommandOption,
-};
+use crate::commands::builder::{ArgDesc, ArgKind, CommandFunction, CommandGroup, CommandOption};
 use crate::commands::function::{Callable, ClassicFunction, SlashFunction};
 use crate::commands::prelude::*;
+use crate::parser;
 use crate::utils::prelude::*;
-use crate::{parser, Context};
 
 const ERROR_MESSAGE: &str = "The bot has encountered an error executing the command! 😕";
 

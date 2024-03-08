@@ -30,8 +30,8 @@ use twilight_model::user::{CurrentUser, User};
 pub use crate::utils::prelude::*;
 
 /// Re-exports of useful things.
+#[allow(unused)]
 pub mod prelude {
-    #![allow(unused)]
     // Error stuff.
     pub use anyhow::{Context as _, Result as AnyResult};
     // Async extras.

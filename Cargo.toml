@@ -63,10 +63,10 @@ version = "1.17"
 [dependencies.songbird]
 default-features = false
 features = ["driver", "gateway", "twilight", "rustls", "builtin-queue"]
-git = "https://github.com/serenity-rs/songbird"
 optional = true
-rev = "4fe23788e859a44a3f29987bff26c2612e74dcc5"
-version = "0.3"
+version = "0.4"
+# git = "https://github.com/serenity-rs/songbird"
+# rev = "4fe23788e859a44a3f29987bff26c2612e74dcc5"
 # branch = "next"
 
 [dependencies.symphonia]

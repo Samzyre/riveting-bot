@@ -4,7 +4,6 @@ use twilight_model::id::Id;
 
 use crate::commands::prelude::*;
 use crate::utils::prelude::*;
-use crate::Context;
 
 /// Command: Ping Pong!
 pub struct Ping;
