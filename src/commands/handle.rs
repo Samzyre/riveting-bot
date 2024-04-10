@@ -12,6 +12,8 @@ use twilight_model::guild::Permissions;
 use twilight_model::http::interaction::{
     InteractionResponse, InteractionResponseData, InteractionResponseType,
 };
+use twilight_model::id::marker::InteractionMarker;
+use twilight_model::id::Id;
 use twilight_util::permission_calculator::PermissionCalculator;
 
 use crate::commands::arg::{Arg, ArgValue, Ref};
@@ -80,7 +82,7 @@ async fn process_slash(
     data: Arc<CommandData>,
 ) -> CommandResult<()> {
     // Acknowledge the interaction.
-    normal_acknowledge(ctx, &inter).await?;
+    public_acknowledge(ctx, inter.id, &inter.token).await?;
 
     let mut args = Vec::new();
     let mut last = Lookup::Command(&base.command);
@@ -178,7 +180,7 @@ async fn process_message(
     data: Arc<CommandData>,
 ) -> CommandResult<()> {
     // Acknowledge the interaction.
-    ephemeral_acknowledge(ctx, &inter).await?;
+    ephemeral_acknowledge(ctx, inter.id, &inter.token).await?;
 
     // let data = data.resolved.as_ref().expect("Empty resolve error");
     // for _message in &data.messages {} // Globally.
@@ -197,7 +199,7 @@ async fn process_user(
     data: Arc<CommandData>,
 ) -> CommandResult<()> {
     // Acknowledge the interaction.
-    ephemeral_acknowledge(ctx, &inter).await?;
+    ephemeral_acknowledge(ctx, inter.id, &inter.token).await?;
 
     // let data = data.resolved.as_ref().expect("Empty resolve error");
     // for _user in &data.users {} // Globally.
@@ -209,25 +211,28 @@ async fn process_user(
 }
 
 /// Creates a publicly visible loading state message.
-async fn normal_acknowledge(ctx: &Context, inter: &Interaction) -> AnyResult<()> {
-    let interaction = ctx.interaction();
-
+pub async fn public_acknowledge(
+    ctx: &Context,
+    id: Id<InteractionMarker>,
+    token: &str,
+) -> AnyResult<()> {
     let resp = InteractionResponse {
         kind: InteractionResponseType::DeferredChannelMessageWithSource,
         data: None,
     };
-
-    interaction
-        .create_response(inter.id, &inter.token, &resp)
-        .await?;
-
-    Ok(())
+    ctx.interaction()
+        .create_response(id, token, &resp)
+        .await
+        .context("Public acknowledge response")
+        .map(|_| ())
 }
 
 /// Creates a personal loading state message.
-async fn ephemeral_acknowledge(ctx: &Context, inter: &Interaction) -> AnyResult<()> {
-    let interaction = ctx.interaction();
-
+pub async fn ephemeral_acknowledge(
+    ctx: &Context,
+    id: Id<InteractionMarker>,
+    token: &str,
+) -> AnyResult<()> {
     let resp = InteractionResponse {
         kind: InteractionResponseType::DeferredChannelMessageWithSource,
         data: Some(InteractionResponseData {
@@ -235,12 +240,11 @@ async fn ephemeral_acknowledge(ctx: &Context, inter: &Interaction) -> AnyResult<
             ..Default::default()
         }),
     };
-
-    interaction
-        .create_response(inter.id, &inter.token, &resp)
-        .await?;
-
-    Ok(())
+    ctx.interaction()
+        .create_response(id, token, &resp)
+        .await
+        .context("Ephemeral acknowledge response")
+        .map(|_| ())
 }
 
 /// Parse message and execute command functions.
