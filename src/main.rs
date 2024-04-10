@@ -1,4 +1,3 @@
-#![feature(associated_type_bounds)]
 #![feature(associated_type_defaults)]
 #![feature(decl_macro)]
 #![feature(iter_intersperse)]
