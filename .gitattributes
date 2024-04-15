@@ -1,11 +1,1 @@
-* text=auto
-*.rs text eol=lf
-*.toml text eol=lf
-*.lock text eol=lf
-*.yml text eol=lf
-*.md text eol=lf
-LICENCE text eol=lf
-Dockerfile* text eol=lf
-.dockerignore text eol=lf
-.gitignore text eol=lf
-.gitattributes text eol=lf
+* text eol=lf
