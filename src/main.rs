@@ -13,7 +13,6 @@
 use std::sync::{Arc, Mutex};
 use std::{env, fs};
 
-use tokio::runtime::Runtime;
 use tokio::sync::mpsc::{self, UnboundedSender};
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
@@ -77,8 +76,6 @@ pub struct Context {
     cache: Arc<InMemoryCache>,
     /// Standby event system.
     standby: Arc<Standby>,
-    /// Async runtime.
-    runtime: Arc<Runtime>,
     /// Shard associated with the event.
     shard: Option<PartialShard>,
     /// Songbird voice manager.
@@ -184,16 +181,8 @@ pub enum BotEvent {
 }
 
 #[tracing::instrument]
-fn main() -> AnyResult<()> {
-    let rt = Arc::new(
-        tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .build()?,
-    );
-    rt.block_on(async_main(Arc::clone(&rt)))
-}
-
-async fn async_main(runtime: Arc<Runtime>) -> AnyResult<()> {
+#[tokio::main]
+async fn main() -> AnyResult<()> {
     // Load environment variables from `./.env` file, if any exists.
     simple_env_load::load_env_from([".env"]);
 
@@ -299,7 +288,6 @@ async fn async_main(runtime: Arc<Runtime>) -> AnyResult<()> {
         user,
         cache,
         standby,
-        runtime,
         shard: None,
         #[cfg(feature = "voice")]
         voice,
