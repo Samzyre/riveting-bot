@@ -84,6 +84,88 @@ pub struct Context {
 }
 
 impl Context {
+    async fn new(
+        events_tx: UnboundedSender<BotEvent>,
+    ) -> AnyResult<(Self, Vec<twilight_gateway::Shard>)> {
+        // Setup bot configuration files.
+        let config = Arc::new(BotConfig::new()?);
+
+        // Initialize chat and interaction commands.
+        let commands = Arc::new(commands::bot::create_commands()?);
+
+        // Get discord bot token from environment variable.
+        let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+
+        // Create an http client.
+        let http = Arc::new(Client::new(token.to_owned()));
+
+        // Get the application info, such as its id and owner.
+        let application = Arc::new(http.current_user_application().send().await?);
+
+        // Get the bot user info.
+        let user = Arc::new(http.current_user().send().await?);
+
+        // Create a cache.
+        let cache = Arc::new(InMemoryCache::new());
+
+        // Create a standby instance.
+        let standby = Arc::new(Standby::new());
+
+        // Create the shards.
+        let shards = stream::create_recommended(
+            &http,
+            ConfigBuilder::new(token, intents())
+                .event_types(event_type_flags())
+                .presence(UpdatePresencePayload::new(
+                    vec![
+                        MinimalActivity {
+                            kind: ActivityType::Watching,
+                            name: "you".into(),
+                            url: None,
+                        }
+                        .into(),
+                    ],
+                    false,
+                    None,
+                    Status::Online,
+                )?)
+                .build(),
+            |_, builder| builder.build(),
+        )
+        .await?
+        .collect::<Vec<_>>();
+
+        #[cfg(feature = "voice")]
+        let voice = {
+            Arc::new(songbird::Songbird::twilight(
+                Arc::new(songbird::shards::TwilightMap::new(
+                    shards
+                        .iter()
+                        .map(|s| (s.id().number(), s.sender()))
+                        .collect(),
+                )),
+                user.id,
+            ))
+        };
+
+        Ok((
+            Self {
+                config,
+                commands,
+                events_tx,
+                http,
+                application,
+                user,
+                cache,
+                standby,
+                shard: None,
+                #[cfg(feature = "voice")]
+                voice,
+            },
+            shards,
+        ))
+    }
+
     /// Shortcut for `self.http.interaction(self.application.id)`.
     pub fn interaction(&self) -> InteractionClient {
         self.http.interaction(self.application.id)
@@ -212,86 +294,13 @@ async fn main() -> AnyResult<()> {
         .compact()
         .init();
 
-    // Setup bot configuration files.
-    let config = Arc::new(BotConfig::new()?);
-
-    // Initialize chat and interaction commands.
-    let commands = Arc::new(commands::bot::create_commands()?);
-
     // Bot events channel.
     let (events_tx, mut events_rx) = mpsc::unbounded_channel();
 
     // Spawn ctrl-c shutdown task.
     tokio::spawn(shutdown_task(events_tx.clone()));
 
-    // Get discord bot token from environment variable.
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-
-    // Create an http client.
-    let http = Arc::new(Client::new(token.to_owned()));
-
-    // Get the application info, such as its id and owner.
-    let application = Arc::new(http.current_user_application().send().await?);
-
-    // Get the bot user info.
-    let user = Arc::new(http.current_user().send().await?);
-
-    // Create a cache.
-    let cache = Arc::new(InMemoryCache::new());
-
-    // Create a standby instance.
-    let standby = Arc::new(Standby::new());
-
-    // Create the shards.
-    let mut shards = stream::create_recommended(
-        &http,
-        ConfigBuilder::new(token, intents())
-            .event_types(event_type_flags())
-            .presence(UpdatePresencePayload::new(
-                vec![
-                    MinimalActivity {
-                        kind: ActivityType::Watching,
-                        name: "you".into(),
-                        url: None,
-                    }
-                    .into(),
-                ],
-                false,
-                None,
-                Status::Online,
-            )?)
-            .build(),
-        |_, builder| builder.build(),
-    )
-    .await?
-    .collect::<Vec<_>>();
-
-    #[cfg(feature = "voice")]
-    let voice = {
-        Arc::new(songbird::Songbird::twilight(
-            Arc::new(songbird::shards::TwilightMap::new(
-                shards
-                    .iter()
-                    .map(|s| (s.id().number(), s.sender()))
-                    .collect(),
-            )),
-            user.id,
-        ))
-    };
-
-    let ctx = Context {
-        config,
-        commands,
-        events_tx,
-        http,
-        application,
-        user,
-        cache,
-        standby,
-        shard: None,
-        #[cfg(feature = "voice")]
-        voice,
-    };
+    let (ctx, mut shards) = Context::new(events_tx).await?;
 
     // Create an infinite stream over the shards' events.
     let mut stream = ShardEventStream::new(shards.iter_mut());
