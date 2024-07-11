@@ -63,9 +63,9 @@ pub fn parse_args(mut input: &str) -> Result<Vec<&str>, CommandError> {
 /// # Notes
 /// - Escape characters are **not** handled.
 /// - If a non-quoted argument contains any delimiters before any whitespace,
-/// those characters (and everything upto a whitespace or the end) will be in the `arg`.
+///   those characters (and everything upto a whitespace or the end) will be in the `arg`.
 /// - If a quoted argument is followed by any character (whitespace or not),
-/// those characters will be in the remaining `Option`.
+///   those characters will be in the remaining `Option`.
 pub fn maybe_quoted_arg(input: &str) -> Result<(&str, Option<&str>), CommandError> {
     // First trim off any leading whitespace.
     let input = input.trim_start();
