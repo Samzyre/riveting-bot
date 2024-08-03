@@ -99,9 +99,9 @@ pub fn maybe_quoted_arg(input: &str) -> Result<(&str, Option<&str>), CommandErro
 }
 
 /// Returns a string-slice without delimiters, or returns ´input´ if no delimiters are found or can be stripped.
-pub fn strip_delimits<'a, P>(input: &'a str, delimits: P) -> &'a str
+pub fn strip_delimits<P>(input: &str, delimits: P) -> &str
 where
-    P: Pattern<'a, Searcher: ReverseSearcher<'a>> + Copy,
+    P: for<'a> Pattern<Searcher<'a>: ReverseSearcher<'a>> + Copy,
 {
     is_surrounded_by(input, delimits).map_or(input, |b| {
         if b {
@@ -117,9 +117,9 @@ where
 
 /// Returns `Some(true)` if `target` is surrounded by any matching pair of delimiters.
 /// Returns `None` if `target` is too short (including empty).
-pub fn is_surrounded_by<'a, P>(target: &'a str, delimits: P) -> Option<bool>
+pub fn is_surrounded_by<P>(target: &str, delimits: P) -> Option<bool>
 where
-    P: Pattern<'a, Searcher: ReverseSearcher<'a>> + Copy,
+    P: for<'a> Pattern<Searcher<'a>: ReverseSearcher<'a>> + Copy,
 {
     let mut chars = target.chars();
     let left = chars.next()?; // None, if empty.
