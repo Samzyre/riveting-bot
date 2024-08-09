@@ -1,7 +1,8 @@
 # Riveting Bot
 
 This is, the one and only, Riveting bot.
-It's built in [Rust][rust-lang] with [Twilight] and runs in a [Docker][docker] container ...or without.
+It's built in [Rust][rust-lang] with [Twilight] and runs in a [Docker][docker] container
+...or without.
 
 Primarily made for the **Riveting** community discord server. _(And to keep that one guy in check.)_
 
@@ -16,10 +17,13 @@ or any other environment variables for the bot.
 ## Build with Rust
 
 - Have [rust-lang] installed with latest nightly toolchain.
-- _a)_ To just build it, run `cargo build` _(for debug build)_ or `cargo build --release` _(for optimized build)_.
+- _a)_ To just build it, run `cargo build` _(for debug build)_ or `cargo build --release`
+  _(for optimized build)_.
 - _b)_ Or to build and run: `cargo run` or `cargo run --release`.
-- _(Optional)_ You can use `cargo` options `--features` and `--no-default-features` to build with other features.
-- _(Optional)_ You can run the executable directly, once built. By default, found in `./target/<build>/`.
+- _(Optional)_ You can use `cargo` options `--features` and `--no-default-features` to build with
+  other features.
+- _(Optional)_ You can run the executable directly, once built. By default, found in
+  `./target/<build>/`.
 
 #### Example
 
@@ -47,12 +51,21 @@ or any other environment variables for the bot.
 
   #### Image features:
 
-  - [`Dockerfile`](Dockerfile): `default` _(minimal size, default for docker-compose)_
-  - [`Dockerfile.extras`](Dockerfile.extras): `default` + `voice` _(built by `docker` github workflow)_
+  - [`Dockerfile`](Dockerfile): `default`
+    _(minimal size, default for docker-compose)_
+  - [`Dockerfile.extras`](Dockerfile.extras): `default` + `voice`
+    _(built by `docker` github workflow)_
+
+## Dependencies
+
+- `voice` feature requires Opus, it can be built from source if `cmake` is available.
+  Additionally, `yt-dlp` is required at runtime. For more information, see
+  [songbird dependencies](https://github.com/serenity-rs/songbird?tab=readme-ov-file#dependencies).
 
 # Contributing
 
-- The best place to search docs for the many crates of `twilight` is probably their [documentation][twilight-docs].
+- The best place to search docs for the many crates of `twilight` is probably their
+  [documentation][twilight-docs].
 
 # Notes
 
