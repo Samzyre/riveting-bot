@@ -139,7 +139,7 @@ impl_id_ext!(User, UserMarker);
 /// <br>`<vis> fn <name> ( &self: <variant> ( <inner> ) ) -> <type> ;`
 /// <br>`<vis> fn <name> ( &self: <variant> ) ;`
 /// # Examples:
-/// ```
+/// ```skip
 /// enum Enum {
 ///     Variant(usize),
 ///     Other(String),
