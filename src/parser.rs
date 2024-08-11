@@ -1,10 +1,30 @@
 //! Functions for parsing arguments.
 #![allow(dead_code)]
 
+use std::mem;
 use std::str::pattern::{Pattern, ReverseSearcher};
 
-use crate::commands::{CommandError, CommandResult};
+use thiserror::Error;
+
 use crate::utils::{self, consts};
+
+#[derive(Debug, Error)]
+pub enum ParseError {
+    #[error("Expected arguments missing")]
+    MissingArgs,
+
+    #[error("Arguments unexpected or failed to process: {0}")]
+    UnexpectedArgs(String),
+
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
+
+impl PartialEq for ParseError {
+    fn eq(&self, other: &Self) -> bool {
+        mem::discriminant(self) == mem::discriminant(other)
+    }
+}
 
 /// Returns `Some((prefix, unprefixed))`,
 /// where `prefix` is the matched prefix and `unprefixed` is everything after.
@@ -35,7 +55,7 @@ pub fn split_once_whitespace(text: &str) -> (&str, Option<&str>) {
 
 /// Try to parse string-slice into arg parts.
 /// For more details about individual argument parsing, see [`maybe_quoted_arg`](maybe_quoted_arg)
-pub fn parse_args(mut input: &str) -> Result<Vec<&str>, CommandError> {
+pub fn parse_args(mut input: &str) -> Result<Vec<&str>, ParseError> {
     let mut args = Vec::new();
 
     loop {
@@ -48,8 +68,8 @@ pub fn parse_args(mut input: &str) -> Result<Vec<&str>, CommandError> {
                 args.push(arg);
                 break;
             },
-            Err(CommandError::MissingArgs) => break, // No more args to parse.
-            Err(e) => return Err(e),                 // Return if failed to parse.
+            Err(ParseError::MissingArgs) => break, // No more args to parse.
+            Err(e) => return Err(e),               // Return if failed to parse.
         }
     }
 
@@ -66,7 +86,7 @@ pub fn parse_args(mut input: &str) -> Result<Vec<&str>, CommandError> {
 ///   those characters (and everything upto a whitespace or the end) will be in the `arg`.
 /// - If a quoted argument is followed by any character (whitespace or not),
 ///   those characters will be in the remaining `Option`.
-pub fn maybe_quoted_arg(input: &str) -> Result<(&str, Option<&str>), CommandError> {
+pub fn maybe_quoted_arg(input: &str) -> Result<(&str, Option<&str>), ParseError> {
     // First trim off any leading whitespace.
     let input = input.trim_start();
 
@@ -74,7 +94,7 @@ pub fn maybe_quoted_arg(input: &str) -> Result<(&str, Option<&str>), CommandErro
     let mut bytes = input.bytes().enumerate();
 
     // Get the first byte or return an error for a missing argument.
-    let (_, initial) = bytes.next().ok_or(CommandError::MissingArgs)?;
+    let (_, initial) = bytes.next().ok_or(ParseError::MissingArgs)?;
 
     // Check if the first byte is a delimiter character (assuming all delimiter characters are one byte wide utf-8).
     if consts::DELIMITERS.contains(&(initial as char)) {
@@ -84,7 +104,7 @@ pub fn maybe_quoted_arg(input: &str) -> Result<(&str, Option<&str>), CommandErro
             .find_map(|(i, b)| (b == initial).then_some(i))
             .ok_or_else(|| {
                 let input = utils::escape_discord_chars(input);
-                CommandError::ParseError(format!(
+                ParseError::Other(anyhow::anyhow!(
                     "Missing matching delimiter: '{input}', expected one of: {}.",
                     utils::nice_list(consts::DELIMITERS)
                 ))
@@ -129,12 +149,10 @@ where
 }
 
 /// Make sure there's nothing else by mistake.
-pub fn ensure_rest_is_empty(rest: Option<&str>) -> CommandResult<()> {
+pub fn ensure_rest_is_empty(rest: Option<&str>) -> Result<(), ParseError> {
     if let Some(rest) = rest {
         if !rest.trim().is_empty() {
-            return Err(CommandError::UnexpectedArgs(
-                format!("Unexpected '{rest}'",),
-            ));
+            return Err(ParseError::UnexpectedArgs(format!("Unexpected '{rest}'",)));
         }
     }
 
