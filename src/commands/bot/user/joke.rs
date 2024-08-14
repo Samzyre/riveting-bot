@@ -1,4 +1,4 @@
-use crate::commands::prelude::*;
+use riveting_bot::commands::prelude::*;
 
 /// Command: Send a dad joke.
 pub struct Joke {
@@ -16,7 +16,7 @@ enum JokeResponse {
 
 impl Joke {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("joke", "Send a bad joke.").attach(Self::slash).dm()
     }

@@ -1,11 +1,10 @@
 use chrono::{DateTime, FixedOffset, Utc};
+use riveting_bot::commands::prelude::*;
+use riveting_bot::utils::prelude::*;
 use twilight_mention::timestamp::{Timestamp, TimestampStyle};
 use twilight_mention::Mention;
 use twilight_model::channel::message::Embed;
 use twilight_util::builder::embed::{self, EmbedFieldBuilder, EmbedFooterBuilder};
-
-use crate::commands::prelude::*;
-use crate::utils::prelude::*;
 
 // dateparser examples: https://github.com/waltzofpearls/dateparser#accepted-date-formats
 
@@ -42,7 +41,7 @@ pub struct Time;
 
 impl Time {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("time", "Display a discord timestamp.")
             .attach(Self::classic)

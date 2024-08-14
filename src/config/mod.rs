@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::any;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};

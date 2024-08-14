@@ -1,5 +1,4 @@
 //! Functions for parsing arguments.
-#![allow(dead_code)]
 
 use std::mem;
 use std::str::pattern::{Pattern, ReverseSearcher};

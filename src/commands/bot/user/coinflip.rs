@@ -1,13 +1,12 @@
 use rand::random;
-
-use crate::commands::prelude::*;
+use riveting_bot::commands::prelude::*;
 
 /// Command: Coinflip.
 pub struct Coinflip;
 
 impl Coinflip {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("coinflip", "Flip a coin.").attach(Self::slash).dm()
     }

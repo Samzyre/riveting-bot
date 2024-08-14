@@ -1,13 +1,13 @@
-use crate::commands::prelude::*;
-use crate::utils::prelude::*;
-use crate::BotEvent;
+use riveting_bot::commands::prelude::*;
+use riveting_bot::utils::prelude::*;
+use riveting_bot::BotEvent;
 
 /// Command: Disconnect and shut down the bot.
 pub struct Shutdown;
 
 impl Shutdown {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("shutdown", "Shutdown the bot.")
             .attach(Self::classic)

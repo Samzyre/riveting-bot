@@ -1,15 +1,14 @@
 use chrono::NaiveTime;
+use riveting_bot::commands::prelude::*;
+use riveting_bot::utils::prelude::*;
 use twilight_util::builder::embed::{EmbedBuilder, EmbedFieldBuilder, EmbedFooterBuilder};
-
-use crate::commands::prelude::*;
-use crate::utils::prelude::*;
 
 /// Command: Calculate fuel required.
 pub struct Fuel;
 
 impl Fuel {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("fuel", "Calculate race fuel required.")
             .attach(Self::slash)

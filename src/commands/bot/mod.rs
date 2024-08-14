@@ -1,13 +1,13 @@
 /*!
 Command template:
 ```
-use crate::commands::prelude::*;
+use riveting_bot::commands::prelude::*;
 
 pub struct Command;
 
 impl Command {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("cmd", "Thing.")
             .attach(Self::classic)
@@ -35,8 +35,8 @@ impl Command {
 ```
 */
 
-use crate::commands::{Commands, CommandsBuilder};
-use crate::utils::prelude::*;
+use riveting_bot::commands::{Commands, CommandsBuilder};
+use riveting_bot::utils::prelude::*;
 
 /// Generic commands.
 pub mod meta;
@@ -100,7 +100,7 @@ pub fn create_commands() -> AnyResult<Commands> {
 
 // HACK: This really is an afterthought.
 fn add_commands_to_help(cmds: &mut CommandsBuilder) {
-    use super::builder::{ArgDesc, ArgKind, CommandOption, StringData};
+    use riveting_bot::commands::builder::{ArgDesc, ArgKind, CommandOption, StringData};
 
     let names = cmds
         .list

@@ -1,3 +1,7 @@
+use riveting_bot::commands::prelude::*;
+use riveting_bot::config::ReactionRole;
+use riveting_bot::utils;
+use riveting_bot::utils::prelude::*;
 use twilight_gateway::Event;
 use twilight_http::request::channel::reaction::RequestReactionType;
 use twilight_model::application::interaction::{Interaction, InteractionData};
@@ -17,17 +21,12 @@ use twilight_model::id::marker::{
 use twilight_model::id::Id;
 use twilight_util::builder::InteractionResponseDataBuilder;
 
-use crate::commands::prelude::*;
-use crate::config::ReactionRole;
-use crate::utils;
-use crate::utils::prelude::*;
-
 /// Command: Manage reaction-roles.
 pub struct Roles;
 
 impl Roles {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("roles", "Manage reaction-roles.")
             .attach(Self::classic)

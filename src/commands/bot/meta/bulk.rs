@@ -1,8 +1,7 @@
+use riveting_bot::commands::prelude::*;
+use riveting_bot::utils::prelude::*;
 use twilight_model::id::marker::{ChannelMarker, MessageMarker};
 use twilight_model::id::Id;
-
-use crate::commands::prelude::*;
-use crate::utils::prelude::*;
 
 const MAX_DELETE: i64 = 100;
 
@@ -11,7 +10,7 @@ pub struct BulkDelete {}
 
 impl BulkDelete {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("bulk-delete", "Delete many of messages.")
             .attach(Self::classic)

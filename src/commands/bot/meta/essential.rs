@@ -1,16 +1,15 @@
 use indoc::formatdoc;
+use riveting_bot::commands::prelude::*;
+use riveting_bot::utils::prelude::*;
 use twilight_model::id::marker::{ChannelMarker, GuildMarker, MessageMarker};
 use twilight_model::id::Id;
-
-use crate::commands::prelude::*;
-use crate::utils::prelude::*;
 
 /// Command: Ping Pong!
 pub struct Ping;
 
 impl Ping {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("ping", "Ping the bot.")
             .attach(Self::classic)
@@ -47,7 +46,7 @@ pub struct About {
 
 impl About {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("about", "Display info about the bot.")
             .attach(Self::classic)
@@ -112,7 +111,7 @@ pub struct Help {
 
 impl Help {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("help", "List bot commands.")
             .attach(Self::classic)

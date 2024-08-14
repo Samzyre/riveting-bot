@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use riveting_bot::commands::prelude::*;
+use riveting_bot::utils::prelude::*;
 use songbird::input::{Input, YoutubeDl};
 use songbird::tracks::Track;
 use songbird::typemap::TypeMapKey;
@@ -11,15 +13,12 @@ use twilight_model::channel::ChannelType;
 use twilight_model::id::marker::{ChannelMarker, GuildMarker, UserMarker};
 use twilight_model::id::Id;
 
-use crate::commands::prelude::*;
-use crate::utils::prelude::*;
-
 /// Command: Voice channel controls.
 pub struct Voice;
 
 impl Voice {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("voice", "Manage voice connection.")
             .attach(Self::classic)

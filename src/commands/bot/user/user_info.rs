@@ -1,10 +1,9 @@
 use std::fmt::Write;
 
+use riveting_bot::commands::prelude::*;
+use riveting_bot::utils::prelude::*;
 use twilight_mention::Mention;
 use twilight_util::builder::embed::{self, EmbedFieldBuilder, ImageSource};
-
-use crate::commands::prelude::*;
-use crate::utils::prelude::*;
 
 // Useful: https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
 
@@ -13,7 +12,7 @@ pub struct UserInfo;
 
 impl UserInfo {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("userinfo", "Get information about a user.")
             .attach(Self::slash)

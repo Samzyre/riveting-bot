@@ -1,15 +1,14 @@
+use riveting_bot::commands::prelude::*;
+use riveting_bot::utils::prelude::*;
 use twilight_model::id::marker::{ChannelMarker, GuildMarker};
 use twilight_model::id::Id;
-
-use crate::commands::prelude::*;
-use crate::utils::prelude::*;
 
 /// Command: Create or edit bot messages.
 pub struct Bot;
 
 impl Bot {
     pub fn command() -> impl Into<BaseCommand> {
-        use crate::commands::builder::*;
+        use riveting_bot::commands::builder::*;
 
         command("bot", "Create or edit bot messages.")
             .attach(Self::classic)

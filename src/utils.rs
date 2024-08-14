@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::borrow::Cow;
 use std::fmt::Display;
 
@@ -27,7 +25,7 @@ use twilight_model::id::Id;
 use twilight_model::oauth::Application;
 use twilight_model::user::{CurrentUser, User};
 
-pub use crate::utils::prelude::*;
+use crate::utils::prelude::*;
 
 /// Re-exports of useful things.
 #[allow(unused)]

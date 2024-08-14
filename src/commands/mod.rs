@@ -50,7 +50,6 @@ use crate::utils::prelude::*;
 use crate::{BotEvent, Context};
 
 pub mod arg;
-pub mod bot;
 pub mod builder;
 pub mod function;
 pub mod handle;
@@ -237,7 +236,7 @@ impl Commands {
 }
 
 impl Commands {
-    fn display(&self, ctx: &Context, guild_id: Option<Id<GuildMarker>>) -> AnyResult<String> {
+    pub fn display(&self, ctx: &Context, guild_id: Option<Id<GuildMarker>>) -> AnyResult<String> {
         let mut slash = vec![];
         let mut classic = vec![];
         let mut gui = vec![];
@@ -281,7 +280,7 @@ impl Commands {
 /// A type for creating a collection of commands and validating them.
 #[derive(Debug, Default, Clone)]
 pub struct CommandsBuilder {
-    list: Vec<BaseCommand>,
+    pub list: Vec<BaseCommand>,
 }
 
 impl CommandsBuilder {
