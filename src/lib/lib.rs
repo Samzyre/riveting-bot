@@ -148,13 +148,10 @@ impl Context {
         guild_id: Id<GuildMarker>,
         ids: &[Id<RoleMarker>],
     ) -> AnyResult<Vec<Role>> {
-        // Try to get the roles from cache.
         let cached_roles = ids
             .iter()
             .map(|id| self.cache.role(*id).map(|r| r.resource().to_owned()))
             .try_collect();
-
-        // Use cached roles or otherwise fetch from client.
         match cached_roles {
             Some(r) => Ok(r),
             None => self.fetch_roles_from(guild_id, ids).await,
@@ -168,31 +165,20 @@ impl Context {
         ids: &[Id<RoleMarker>],
     ) -> AnyResult<Vec<Role>> {
         let mut fetch = self.http.roles(guild_id).send().await?;
-
-        // Manually update the cache.
         for role in fetch.iter().cloned() {
             self.cache.update(&RoleUpdate { guild_id, role });
         }
-
         fetch.retain(|r| ids.contains(&r.id));
-
         Ok(fetch)
     }
 
     /// Get the channel object from cache or fetch from client.
     pub async fn channel_from(&self, channel_id: Id<ChannelMarker>) -> AnyResult<Channel> {
         match self.cache.channel(channel_id) {
-            Some(chan) => {
-                // Use cached channel.
-                Ok(chan.to_owned())
-            },
+            Some(chan) => Ok(chan.to_owned()),
             None => {
-                // Fetch channel from the http client.
                 let chan = self.http.channel(channel_id).send().await?;
-
-                // Manually update the cache.
                 self.cache.update(&ChannelUpdate(chan.clone()));
-
                 Ok(chan)
             },
         }
@@ -207,7 +193,7 @@ impl Context {
         match self.cache.voice_state(user_id, guild_id) {
             Some(s) => Some(s.channel_id()),
             None => {
-                // FIXME: `voice_states` is empty.
+                // `voice_states` is empty in some cases?
                 let g = self.http.guild(guild_id).send().await?;
                 g.voice_states
                     .into_iter()
