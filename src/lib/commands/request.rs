@@ -21,7 +21,7 @@ pub struct ClassicRequest {
 }
 
 impl ClassicRequest {
-    pub fn new(command: Arc<BaseCommand>, message: Arc<Message>, args: Args) -> Self {
+    pub const fn new(command: Arc<BaseCommand>, message: Arc<Message>, args: Args) -> Self {
         Self {
             command,
             message,
@@ -49,7 +49,7 @@ pub struct SlashRequest {
 }
 
 impl SlashRequest {
-    pub fn new(
+    pub const fn new(
         command: Arc<BaseCommand>,
         interaction: Arc<Interaction>,
         data: Arc<CommandData>,
@@ -83,7 +83,7 @@ pub struct MessageRequest {
 }
 
 impl MessageRequest {
-    pub fn new(
+    pub const fn new(
         command: Arc<BaseCommand>,
         interaction: Arc<Interaction>,
         data: Arc<CommandData>,
@@ -117,7 +117,7 @@ pub struct UserRequest {
 }
 
 impl UserRequest {
-    pub fn new(
+    pub const fn new(
         command: Arc<BaseCommand>,
         interaction: Arc<Interaction>,
         data: Arc<CommandData>,
