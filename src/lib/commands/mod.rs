@@ -60,10 +60,7 @@ pub mod prelude {
     pub use crate::commands::arg::{ArgValueExt, Args};
     pub use crate::commands::builder::BaseCommand;
     pub use crate::commands::request::{ClassicRequest, MessageRequest, SlashRequest, UserRequest};
-    pub use crate::commands::{
-        AsyncResponse, CommandError, CommandFuture, CommandResponse, CommandResult, Response,
-        ResponseFuture,
-    };
+    pub use crate::commands::{CommandError, CommandResponse, CommandResult, Response};
     pub use crate::Context;
 }
 
