@@ -281,34 +281,34 @@ pub struct ChannelData {
 
 #[derive(Debug, Clone, Display)]
 pub enum ArgKind {
-    #[display(fmt = "bool")]
+    #[display("bool")]
     Bool,
 
-    #[display(fmt = "number")]
+    #[display("number")]
     Number(NumericalData<f64>),
 
-    #[display(fmt = "integer")]
+    #[display("integer")]
     Integer(NumericalData<i64>),
 
-    #[display(fmt = "string")]
+    #[display("string")]
     String(StringData),
 
-    #[display(fmt = "channel")]
+    #[display("channel")]
     Channel(ChannelData),
 
-    #[display(fmt = "message")]
+    #[display("message")]
     Message,
 
-    #[display(fmt = "attachment")]
+    #[display("attachment")]
     Attachment, // TODO: Define if this should try to capture the object (eg. uploaded attachment or attachment in replied message)
 
-    #[display(fmt = "user")]
+    #[display("user")]
     User, // TODO: Define if this should try to capture the object (eg. sender)
 
-    #[display(fmt = "role")]
+    #[display("role")]
     Role,
 
-    #[display(fmt = "mention")]
+    #[display("mention")]
     Mention,
 }
 
