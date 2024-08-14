@@ -1,3 +1,4 @@
+#![allow(clippy::redundant_pub_crate)]
 #![allow(clippy::significant_drop_in_scrutinee)]
 
 use std::sync::{Arc, Mutex};
