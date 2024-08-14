@@ -18,15 +18,16 @@ FROM rust AS builder
 
 # Use sparse registry.
 ARG CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-
 ARG BOT_FEATURES=voice
-
 ARG BOT_PROFILE BOT_TARGET
 
 # Create a new empty shell project.
 RUN cargo new --bin app
-
 WORKDIR /app
+
+# Create a temporary lib.rs to match the Cargo.toml config.
+ARG TEMPLIB=lib/lib.rs
+RUN mkdir -p $(dirname $TEMPLIB) && touch $TEMPLIB
 
 # Copy manifests.
 # COPY ./.cargo ./.cargo
