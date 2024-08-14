@@ -1,7 +1,7 @@
 use indoc::formatdoc;
 use riveting_bot::commands::prelude::*;
 use riveting_bot::utils::prelude::*;
-use twilight_model::id::marker::{ChannelMarker, GuildMarker, MessageMarker};
+use twilight_model::id::marker::GuildMarker;
 use twilight_model::id::Id;
 
 /// Command: Ping Pong!
@@ -40,8 +40,6 @@ impl Ping {
 /// Command: Info about the bot.
 pub struct About {
     guild_id: Option<Id<GuildMarker>>,
-    channel_id: Option<Id<ChannelMarker>>,
-    message_id: Option<Id<MessageMarker>>,
 }
 
 impl About {
@@ -70,8 +68,6 @@ impl About {
     async fn classic(ctx: Context, req: ClassicRequest) -> CommandResponse {
         let about_msg = Self {
             guild_id: req.message.guild_id,
-            channel_id: Some(req.message.channel_id),
-            message_id: Some(req.message.id),
         }
         .uber(&ctx);
 
@@ -87,8 +83,6 @@ impl About {
     async fn slash(ctx: Context, req: SlashRequest) -> CommandResponse {
         let about_msg = Self {
             guild_id: req.interaction.guild_id,
-            channel_id: req.interaction.channel.as_ref().map(|c| c.id),
-            message_id: None,
         }
         .uber(&ctx);
 
@@ -105,8 +99,6 @@ impl About {
 pub struct Help {
     args: Args,
     guild_id: Option<Id<GuildMarker>>,
-    channel_id: Option<Id<ChannelMarker>>,
-    message_id: Option<Id<MessageMarker>>,
 }
 
 impl Help {
@@ -143,8 +135,6 @@ impl Help {
         let help_msg = Self {
             args: req.args,
             guild_id: req.message.guild_id,
-            channel_id: Some(req.message.channel_id),
-            message_id: Some(req.message.id),
         }
         .uber(&ctx)?;
 
@@ -161,8 +151,6 @@ impl Help {
         let help_msg = Self {
             args: req.args,
             guild_id: req.interaction.guild_id,
-            channel_id: req.interaction.channel.as_ref().map(|c| c.id),
-            message_id: None,
         }
         .uber(&ctx)?;
 

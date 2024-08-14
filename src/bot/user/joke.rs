@@ -1,9 +1,7 @@
 use riveting_bot::commands::prelude::*;
 
 /// Command: Send a dad joke.
-pub struct Joke {
-    args: Args,
-}
+pub struct Joke;
 
 #[derive(serde::Deserialize)]
 #[serde(tag = "type")]
