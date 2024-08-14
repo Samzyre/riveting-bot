@@ -22,7 +22,6 @@ use twilight_model::guild::Guild;
 use twilight_model::id::Id;
 use twilight_model::voice::VoiceState;
 
-#[path = "commands/bot/mod.rs"]
 mod bot;
 
 #[tracing::instrument]
