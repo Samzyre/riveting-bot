@@ -6,11 +6,15 @@
 #![feature(trait_alias)]
 
 use std::env;
+use std::future::Future;
 use std::sync::Arc;
 
 use tokio::sync::mpsc::UnboundedSender;
 use twilight_cache_inmemory::InMemoryCache;
-use twilight_gateway::{stream, ConfigBuilder, EventTypeFlags, MessageSender, Shard, ShardId};
+use twilight_gateway::stream::ShardRef;
+use twilight_gateway::{
+    stream, ConfigBuilder, Event, EventTypeFlags, MessageSender, Shard, ShardId,
+};
 use twilight_http::client::InteractionClient;
 use twilight_http::Client;
 use twilight_model::channel::Channel;
@@ -137,9 +141,30 @@ impl Context {
         ))
     }
 
-    /// Shortcut for `self.http.interaction(self.application.id)`.
-    pub fn interaction(&self) -> InteractionClient {
-        self.http.interaction(self.application.id)
+    pub async fn handle<Fut>(
+        &self,
+        shard: ShardRef<'_>,
+        event: Event,
+        handler: fn(Self, Event) -> Fut,
+    ) where
+        Fut: Future<Output = AnyResult<()>> + Send + 'static,
+    {
+        // Update the cache with the event.
+        self.cache.update(&event);
+
+        // Update songbird if enabled.
+        #[cfg(feature = "voice")]
+        self.voice.process(&event).await;
+
+        // Update standby events.
+        let processed = self.standby.process(&event);
+        log_processed(processed);
+
+        // Handle event.
+        tokio::spawn(handler(
+            self.clone().with_shard(shard.id(), shard.sender()),
+            event,
+        ));
     }
 
     /// Get role objects with `ids` from cache or fetch from client.
@@ -212,11 +237,28 @@ impl Context {
         self.shard = Some(PartialShard { id, sender });
         self
     }
+
+    /// Shortcut for `self.http.interaction(self.application.id)`.
+    pub fn interaction(&self) -> InteractionClient {
+        self.http.interaction(self.application.id)
+    }
 }
 
 #[derive(Debug)]
 pub enum BotEvent {
     Shutdown,
+}
+
+fn log_processed(p: twilight_standby::ProcessResults) {
+    if p.dropped() + p.fulfilled() + p.matched() + p.sent() > 0 {
+        debug!(
+            "Standby: {{ m: {}, d: {}, f: {}, s: {} }}",
+            p.matched(),
+            p.dropped(),
+            p.fulfilled(),
+            p.sent(),
+        );
+    }
 }
 
 /// Discord permission intents.

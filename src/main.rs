@@ -92,22 +92,7 @@ async fn main() -> AnyResult<()> {
             },
         };
 
-        // Update the cache with the event.
-        ctx.cache.update(&event);
-
-        // Update songbird if enabled.
-        #[cfg(feature = "voice")]
-        ctx.voice.process(&event).await;
-
-        // Update standby events.
-        let processed = ctx.standby.process(&event);
-        log_processed(processed);
-
-        // Handle event.
-        tokio::spawn(handle_event(
-            ctx.clone().with_shard(shard.id(), shard.sender()),
-            event,
-        ));
+        ctx.handle(shard, event, handle_event).await;
     }
 
     drop(stream);
@@ -476,16 +461,4 @@ async fn handle_reaction_remove(ctx: &Context, reaction: GatewayReaction) -> Any
 async fn handle_voice_state(_ctx: &Context, _voice: VoiceState) -> AnyResult<()> {
     // println!("{voice:#?}",);
     Ok(())
-}
-
-fn log_processed(p: twilight_standby::ProcessResults) {
-    if p.dropped() + p.fulfilled() + p.matched() + p.sent() > 0 {
-        debug!(
-            "Standby: {{ m: {}, d: {}, f: {}, s: {} }}",
-            p.matched(),
-            p.dropped(),
-            p.fulfilled(),
-            p.sent(),
-        );
-    }
 }
