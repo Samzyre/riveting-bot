@@ -78,7 +78,9 @@ pub fn parse_args(mut input: &str) -> Result<Vec<&str>, ParseError> {
 /// Parse text and return a tuple `(arg, Option<rest>)`,
 /// where `arg` is either the first quoted part, the first whitespace separated part
 /// or the whole input (after `trim_start`).
+///
 /// The `Option` will contain the remaining text, if any.
+///
 /// # Notes
 /// - Escape characters are **not** handled.
 /// - If a non-quoted argument contains any delimiters before any whitespace,

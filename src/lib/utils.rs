@@ -133,9 +133,11 @@ impl_id_ext!(Role, RoleMarker);
 impl_id_ext!(User, UserMarker);
 
 /// Macro to create enum methods for optional variant.
-/// <br>`<vis> fn <name> ( &self: <variant> ( <inner> ) ) -> <type> { <expression> }`
-/// <br>`<vis> fn <name> ( &self: <variant> ( <inner> ) ) -> <type> ;`
-/// <br>`<vis> fn <name> ( &self: <variant> ) ;`
+///
+/// `<vis> fn <name> ( &self: <variant> ( <inner> ) ) -> <type> { <expression> }`<br>
+/// `<vis> fn <name> ( &self: <variant> ( <inner> ) ) -> <type> ;`<br>
+/// `<vis> fn <name> ( &self: <variant> ) ;`<br>
+///
 /// # Examples:
 /// ```skip
 /// enum Enum {
