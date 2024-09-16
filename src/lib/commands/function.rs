@@ -31,53 +31,6 @@ pub mod mock {
     }
 }
 
-macro_rules! function_trait {
-    ($request:ty => $var:path) => {
-        impl<F, Fut> Callable<$request> for F
-        where
-            F: Fn(Context, $request) -> Fut + Send + Sync + 'static,
-            Fut: ResponseFuture + 'static,
-        {
-            fn call(&self, ctx: Context, req: $request) -> AsyncResponse {
-                Box::pin((self)(ctx, req))
-            }
-        }
-
-        impl Callable<$request> for Arc<dyn Callable<$request>> {
-            fn call(&self, ctx: Context, req: $request) -> AsyncResponse {
-                (**self).call(ctx, req)
-            }
-
-            fn into_shared(self) -> Arc<dyn Callable<$request>> {
-                self
-            }
-        }
-
-        impl<T> IntoFunction<$request> for T
-        where
-            T: Callable<$request> + 'static,
-        {
-            fn into_function(self) -> Function {
-                $var(self.into_shared())
-            }
-        }
-    };
-}
-
-// Function that can handle basic text command.
-function_trait!(ClassicRequest => Function::Classic);
-// Function that can handle interactive text command.
-function_trait!(SlashRequest => Function::Slash);
-// Function that can handle GUI-based message command.
-function_trait!(MessageRequest => Function::Message);
-// Function that can handle GUI-based user command.
-function_trait!(UserRequest => Function::User);
-
-pub type ClassicFunction = Arc<dyn Callable<ClassicRequest>>;
-pub type SlashFunction = Arc<dyn Callable<SlashRequest>>;
-pub type MessageFunction = Arc<dyn Callable<MessageRequest>>;
-pub type UserFunction = Arc<dyn Callable<UserRequest>>;
-
 /// Trait for functions that can be called with a generic request.
 pub trait Callable<R, O = AsyncResponse>: Send + Sync {
     fn call(&self, ctx: Context, req: R) -> O;
@@ -89,10 +42,75 @@ pub trait Callable<R, O = AsyncResponse>: Send + Sync {
     }
 }
 
+impl<R, F, Fut> Callable<R> for F
+where
+    F: Fn(Context, R) -> Fut + Send + Sync + 'static,
+    Fut: ResponseFuture + 'static,
+{
+    fn call(&self, ctx: Context, req: R) -> AsyncResponse {
+        Box::pin((self)(ctx, req))
+    }
+}
+
+impl<R> Callable<R> for Arc<dyn Callable<R>> {
+    fn call(&self, ctx: Context, req: R) -> AsyncResponse {
+        (**self).call(ctx, req)
+    }
+
+    fn into_shared(self) -> Arc<dyn Callable<R>> {
+        self
+    }
+}
+
 /// Trait for converting something callable into a specific supported type.
 pub trait IntoFunction<R> {
     fn into_function(self) -> Function;
 }
+
+impl<T> IntoFunction<ClassicRequest> for T
+where
+    T: Callable<ClassicRequest> + 'static,
+{
+    fn into_function(self) -> Function {
+        Function::Classic(self.into_shared())
+    }
+}
+
+impl<T> IntoFunction<SlashRequest> for T
+where
+    T: Callable<SlashRequest> + 'static,
+{
+    fn into_function(self) -> Function {
+        Function::Slash(self.into_shared())
+    }
+}
+
+impl<T> IntoFunction<MessageRequest> for T
+where
+    T: Callable<MessageRequest> + 'static,
+{
+    fn into_function(self) -> Function {
+        Function::Message(self.into_shared())
+    }
+}
+
+impl<T> IntoFunction<UserRequest> for T
+where
+    T: Callable<UserRequest> + 'static,
+{
+    fn into_function(self) -> Function {
+        Function::User(self.into_shared())
+    }
+}
+
+/// Function that can handle basic text command.
+pub type ClassicFunction = Arc<dyn Callable<ClassicRequest>>;
+/// Function that can handle interactive text command.
+pub type SlashFunction = Arc<dyn Callable<SlashRequest>>;
+/// Function that can handle GUI-based message command.
+pub type MessageFunction = Arc<dyn Callable<MessageRequest>>;
+/// Function that can handle GUI-based user command.
+pub type UserFunction = Arc<dyn Callable<UserRequest>>;
 
 /// Supported function types.
 #[derive(Clone, Unwrap, IsVariant)]
