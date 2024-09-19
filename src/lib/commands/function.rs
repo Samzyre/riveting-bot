@@ -32,9 +32,9 @@ pub mod mock {
 }
 
 /// Trait for functions that can be called with a generic request.
-pub trait Callable<R, O = AsyncResponse>: Send + Sync {
-    fn call(&self, ctx: Context, req: R) -> O;
-    fn into_shared(self) -> Arc<dyn Callable<R, O>>
+pub trait Callable<P, O = AsyncResponse>: Send + Sync {
+    fn call(&self, params: P) -> O;
+    fn into_shared(self) -> Arc<dyn Callable<P, O>>
     where
         Self: Sized + 'static,
     {
@@ -42,22 +42,32 @@ pub trait Callable<R, O = AsyncResponse>: Send + Sync {
     }
 }
 
-impl<R, F, Fut> Callable<R> for F
+impl<R, F, Fut> Callable<(Context, R)> for F
 where
     F: Fn(Context, R) -> Fut + Send + Sync + 'static,
     Fut: ResponseFuture + 'static,
 {
-    fn call(&self, ctx: Context, req: R) -> AsyncResponse {
-        Box::pin((self)(ctx, req))
+    fn call(&self, params: (Context, R)) -> AsyncResponse {
+        Box::pin((self)(params.0, params.1))
     }
 }
 
-impl<R> Callable<R> for Arc<dyn Callable<R>> {
-    fn call(&self, ctx: Context, req: R) -> AsyncResponse {
-        (**self).call(ctx, req)
+impl<R, S, F, Fut> Callable<(Context, R, S)> for F
+where
+    F: Fn(Context, R, S) -> Fut + Send + Sync + 'static,
+    Fut: ResponseFuture + 'static,
+{
+    fn call(&self, params: (Context, R, S)) -> AsyncResponse {
+        Box::pin((self)(params.0, params.1, params.2))
+    }
+}
+
+impl<P> Callable<P> for Arc<dyn Callable<P>> {
+    fn call(&self, params: P) -> AsyncResponse {
+        (**self).call(params)
     }
 
-    fn into_shared(self) -> Arc<dyn Callable<R>> {
+    fn into_shared(self) -> Self {
         self
     }
 }
@@ -69,7 +79,7 @@ pub trait IntoFunction<R> {
 
 impl<T> IntoFunction<ClassicRequest> for T
 where
-    T: Callable<ClassicRequest> + 'static,
+    T: Callable<(Context, ClassicRequest)> + 'static,
 {
     fn into_function(self) -> Function {
         Function::Classic(self.into_shared())
@@ -78,7 +88,7 @@ where
 
 impl<T> IntoFunction<SlashRequest> for T
 where
-    T: Callable<SlashRequest> + 'static,
+    T: Callable<(Context, SlashRequest)> + 'static,
 {
     fn into_function(self) -> Function {
         Function::Slash(self.into_shared())
@@ -87,7 +97,7 @@ where
 
 impl<T> IntoFunction<MessageRequest> for T
 where
-    T: Callable<MessageRequest> + 'static,
+    T: Callable<(Context, MessageRequest)> + 'static,
 {
     fn into_function(self) -> Function {
         Function::Message(self.into_shared())
@@ -96,7 +106,7 @@ where
 
 impl<T> IntoFunction<UserRequest> for T
 where
-    T: Callable<UserRequest> + 'static,
+    T: Callable<(Context, UserRequest)> + 'static,
 {
     fn into_function(self) -> Function {
         Function::User(self.into_shared())
@@ -104,13 +114,13 @@ where
 }
 
 /// Function that can handle basic text command.
-pub type ClassicFunction = Arc<dyn Callable<ClassicRequest>>;
+pub type ClassicFunction = Arc<dyn Callable<(Context, ClassicRequest)>>;
 /// Function that can handle interactive text command.
-pub type SlashFunction = Arc<dyn Callable<SlashRequest>>;
+pub type SlashFunction = Arc<dyn Callable<(Context, SlashRequest)>>;
 /// Function that can handle GUI-based message command.
-pub type MessageFunction = Arc<dyn Callable<MessageRequest>>;
+pub type MessageFunction = Arc<dyn Callable<(Context, MessageRequest)>>;
 /// Function that can handle GUI-based user command.
-pub type UserFunction = Arc<dyn Callable<UserRequest>>;
+pub type UserFunction = Arc<dyn Callable<(Context, UserRequest)>>;
 
 /// Supported function types.
 #[derive(Clone, Unwrap, IsVariant)]

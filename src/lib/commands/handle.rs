@@ -556,14 +556,14 @@ impl<'a> Lookup<'a> {
 async fn execute<I, F, R>(ctx: &Context, funcs: I, req: R) -> CommandResult<()>
 where
     I: Iterator<Item = F> + Send,
-    F: Callable<R>,
+    F: Callable<(Context, R)>,
     R: Clone + Send,
 {
     let mut set = JoinSet::<CommandResponse>::new();
     let mut results = Vec::new();
 
     for func in funcs {
-        set.spawn(func.call(ctx.to_owned(), req.to_owned()));
+        set.spawn(func.call((ctx.to_owned(), req.to_owned())));
     }
 
     // Wait for completion.
