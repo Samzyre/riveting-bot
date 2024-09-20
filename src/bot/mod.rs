@@ -35,8 +35,13 @@ impl Command {
 ```
 */
 
+use std::sync::Arc;
+
 use riveting_bot::commands::{Commands, CommandsBuilder};
+use riveting_bot::config::BotConfig;
 use riveting_bot::utils::prelude::*;
+use riveting_bot::BotEventSender;
+use twilight_standby::Standby;
 
 /// Generic commands.
 pub mod meta;
@@ -123,4 +128,18 @@ fn add_commands_to_help(cmds: &mut CommandsBuilder) {
         })
         .expect("No help command found");
     *choices = names;
+}
+
+pub struct _State {
+    /// Bot configuration.
+    config: Arc<BotConfig>,
+    /// Bot commands list.
+    commands: Arc<Commands>,
+    /// Bot events channel.
+    events_tx: BotEventSender,
+    /// Standby twilight event system.
+    standby: Arc<Standby>,
+    /// Songbird voice manager.
+    #[cfg(feature = "voice")]
+    voice: Arc<songbird::Songbird>,
 }
