@@ -4,7 +4,7 @@
 use std::sync::{Arc, Mutex};
 use std::{env, fs};
 
-use riveting_bot::commands::{handle, CommandError};
+use riveting_bot::commands::{CommandError, handle};
 use riveting_bot::utils::prelude::*;
 use riveting_bot::utils::{self};
 use riveting_bot::{BotEvent, BotEventSender, Context};
@@ -15,10 +15,10 @@ use twilight_gateway::stream::ShardEventStream;
 use twilight_gateway::{CloseFrame, Event};
 use twilight_model::application::interaction::{Interaction, InteractionData};
 use twilight_model::channel::Message;
+use twilight_model::gateway::GatewayReaction;
 use twilight_model::gateway::payload::incoming::{
     Hello, MessageDelete, MessageDeleteBulk, MessageUpdate, Ready,
 };
-use twilight_model::gateway::GatewayReaction;
 use twilight_model::guild::Guild;
 use twilight_model::id::Id;
 use twilight_model::voice::VoiceState;

@@ -2,18 +2,18 @@ use std::sync::Arc;
 
 use tokio::task::JoinSet;
 use twilight_model::application::command::CommandType;
+use twilight_model::application::interaction::Interaction;
 use twilight_model::application::interaction::application_command::{
     CommandData, CommandOptionValue,
 };
-use twilight_model::application::interaction::Interaction;
-use twilight_model::channel::message::MessageFlags;
 use twilight_model::channel::Message;
+use twilight_model::channel::message::MessageFlags;
 use twilight_model::guild::Permissions;
 use twilight_model::http::interaction::{
     InteractionResponse, InteractionResponseData, InteractionResponseType,
 };
-use twilight_model::id::marker::InteractionMarker;
 use twilight_model::id::Id;
+use twilight_model::id::marker::InteractionMarker;
 use twilight_util::permission_calculator::PermissionCalculator;
 
 use crate::commands::arg::{Arg, ArgValue, Ref};
