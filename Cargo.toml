@@ -2,7 +2,7 @@
 edition = "2021"
 name = "riveting-bot"
 repository = "https://github.com/Samzyre/riveting-bot"
-version = "0.4.0"
+version = "0.4.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
