@@ -1,7 +1,6 @@
 #![feature(decl_macro)]
 #![feature(iter_intersperse)]
 #![feature(iterator_try_collect)]
-#![feature(option_get_or_insert_default)]
 #![feature(pattern)]
 #![feature(trait_alias)]
 
