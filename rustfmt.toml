@@ -1,7 +1,7 @@
 # Meta
 edition = "2021"
 unstable_features = true
-version = "Two"
+style_edition = "2021"
 
 # Ordering
 group_imports = "StdExternalCrate"

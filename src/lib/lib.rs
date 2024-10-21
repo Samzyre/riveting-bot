@@ -91,14 +91,12 @@ impl Context {
             ConfigBuilder::new(token, intents())
                 .event_types(event_type_flags())
                 .presence(UpdatePresencePayload::new(
-                    vec![
-                        MinimalActivity {
-                            kind: ActivityType::Watching,
-                            name: "you".into(),
-                            url: None,
-                        }
-                        .into(),
-                    ],
+                    vec![MinimalActivity {
+                        kind: ActivityType::Watching,
+                        name: "you".into(),
+                        url: None,
+                    }
+                    .into()],
                     false,
                     None,
                     Status::Online,
