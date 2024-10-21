@@ -257,6 +257,9 @@ pub async fn classic_command(ctx: &Context, msg: Arc<Message>) -> CommandResult<
 
     // Get first possible command name.
     let (name, mut rest) = parser::split_once_whitespace(unprefixed);
+    if name.trim().is_empty() {
+        return Err(CommandError::NotPrefixed); // Not a command if next character is whitespace.
+    }
 
     // Lookup command from context.
     let Some(base) = ctx.commands.get(name) else {
